@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { safeNext } from "@/lib/auth/redirect";
 import { forgotSchema, loginSchema, registerSchema, resetSchema } from "@/lib/validations/auth";
 import type { FormState } from "@/types/forms";
 
@@ -28,7 +29,7 @@ export async function signInAction(_: FormState, formData: FormData): Promise<Fo
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) return { error: friendly(error.message) };
-  redirect("/dashboard");
+  redirect(safeNext(formData.get("next")));
 }
 
 export async function signUpAction(_: FormState, formData: FormData): Promise<FormState> {
@@ -41,7 +42,7 @@ export async function signUpAction(_: FormState, formData: FormData): Promise<Fo
     password: parsed.data.password,
     options: {
       data: { full_name: parsed.data.fullName },
-      emailRedirectTo: `${await siteUrl()}/auth/callback?next=/onboarding`,
+      emailRedirectTo: `${await siteUrl()}/auth/callback?next=${encodeURIComponent(safeNext(formData.get("next"), "/onboarding"))}`,
     },
   });
   if (error) return { error: friendly(error.message) };

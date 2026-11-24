@@ -20,5 +20,13 @@ SaaS multi-entreprises de gestion (imprimerie, événementiel). Next.js 15 (App 
 - Journal d'activité en écriture seule via fonctions serveur ; aucune clé `service_role` dans l'application.
 - Logos : bucket privé `organization-assets`, chemins préfixés par `organization_id`.
 
-## Hors périmètre Phase 1
-CRUD départements, invitations par e-mail, permissions fines, restriction par département : Phase 2.
+## Phase 2 : organisation interne
+- Migration `20261125000001_permissions.sql` : catalogue `permissions` (module.action), rôles par entreprise (`role_permissions`, copiés depuis des modèles), surcharges individuelles `grant`/`deny` avec expiration (`member_permissions`), accès transversaux (`department_access_grants`), historique (`permission_changes`).
+- `has_permission()` : propriétaire = tout ; sinon surcharge non expirée (deny prioritaire) puis permissions du rôle.
+- Visibilité par département : un collaborateur ne voit que ses départements et ses collègues, sauf permission ou accès transversal.
+- Anti-escalade : on n'accorde que ce qu'on possède ; seul le propriétaire crée des administrateurs ; le rôle `owner` n'est jamais modifiable côté client.
+- Invitations : `create_invitation()` (jeton généré en base, seul le hash est stocké) et `accept_invitation()` (e-mail vérifié et identique à l'invitation). **Pas d'envoi d'e-mail** : le lien est affiché une fois à l'administrateur.
+- Pages : /departments, /employees, /employees/[id], /settings/permissions, /invite/[token]. Sélecteur d'entreprise si l'utilisateur en a plusieurs.
+
+## Hors périmètre actuel
+Données métier (clients, devis, factures...) : Phase 3 ; elles devront porter `department_id` et utiliser `can_access_department()`.

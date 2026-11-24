@@ -33,7 +33,15 @@ export async function updateSession(request: NextRequest) {
     return res;
   };
 
-  if (!user && !isPublic) return redirectTo("/login");
+  if (!user && !isPublic) {
+    const target = request.nextUrl.clone();
+    target.pathname = "/login";
+    target.search = "";
+    if (path !== "/" && path !== "/dashboard") target.searchParams.set("next", path);
+    const res = NextResponse.redirect(target);
+    response.cookies.getAll().forEach((c) => res.cookies.set(c));
+    return res;
+  }
   if (user && (path === "/login" || path === "/register" || path === "/forgot-password")) return redirectTo("/dashboard");
   return response;
 }

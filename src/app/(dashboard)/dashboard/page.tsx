@@ -1,28 +1,32 @@
 import { redirect } from "next/navigation";
 import { getSessionContext } from "@/lib/auth/session";
+import { Flash } from "@/components/ui/flash";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Tableau de bord" };
 
-const ACTION_LABELS: Record<string, string> = { "organization.created": "Entreprise créée" };
+const ACTION_LABELS: Record<string, string> = { "organization.created": "Entreprise créée", "invitation.created": "Invitation créée", "invitation.accepted": "Invitation acceptée" };
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ ok?: string; err?: string }> }) {
+  const sp = await searchParams;
   const ctx = await getSessionContext();
   if (!ctx?.organization || !ctx.membership) redirect("/onboarding");
   const supabase = await createClient();
   const orgId = ctx.organization.id;
-  const canSeeFinance = ["owner", "admin"].includes(ctx.membership.role);
+  const canSeeFinance = ctx.permissions.includes("finance.view");
+  const canSeeLogs = ctx.permissions.includes("permissions.manage");
 
   const [members, departments, logs] = await Promise.all([
     supabase.from("memberships").select("id", { count: "exact", head: true }).eq("organization_id", orgId).eq("status", "active"),
     supabase.from("departments").select("id", { count: "exact", head: true }).eq("organization_id", orgId).eq("is_active", true),
-    canSeeFinance
+    canSeeLogs
       ? supabase.from("activity_logs").select("id, action, created_at").eq("organization_id", orgId).order("created_at", { ascending: false }).limit(8)
       : Promise.resolve({ data: [] as { id: number; action: string; created_at: string }[] }),
   ]);
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
+      <Flash ok={sp.ok} err={sp.err} />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Bonjour, {ctx.fullName.split(" ")[0]}</h1>
         <p className="mt-1 text-sm text-slate-600">Espace de travail de {ctx.organization.name}.</p>
@@ -42,11 +46,11 @@ export default async function DashboardPage() {
       {canSeeFinance && (
         <section className="rounded-xl border border-dashed border-slate-300 bg-white p-5">
           <h2 className="text-sm font-semibold">Indicateurs financiers</h2>
-          <p className="mt-1 text-sm text-slate-600">Chiffre d'affaires, dépenses, factures impayées et devis en attente s'afficheront ici dès que la facturation sera en place (phase 3). Réservé aux propriétaires et administrateurs.</p>
+          <p className="mt-1 text-sm text-slate-600">Chiffre d'affaires, dépenses, factures impayées et devis en attente s'afficheront ici dès que la facturation sera en place (phase 3). Visible uniquement avec la permission « Chiffres financiers · Voir ».</p>
         </section>
       )}
 
-      {canSeeFinance && (
+      {canSeeLogs && (
         <section>
           <h2 className="mb-3 text-sm font-semibold">Activité récente</h2>
           <ul className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white">
