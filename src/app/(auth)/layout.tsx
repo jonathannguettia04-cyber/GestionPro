@@ -1,6 +1,6 @@
-import { Logo } from "@/components/layout/logo";
+﻿import { Logo } from "@/components/layout/logo";
 
-const flow = ["Devis", "Acompte", "Maquette validée", "Production", "Livraison", "Solde"];
+const flow = ["Devis", "Acompte", "Maquette validÃ©e", "Production", "Livraison", "Solde"];
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -8,7 +8,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <aside className="relative hidden flex-col justify-between bg-night p-12 text-white lg:flex">
         <Logo light />
         <div className="max-w-md">
-          <h2 className="text-4xl font-semibold leading-tight tracking-tight">De la demande client au solde, chaque étape est tracée.</h2>
+          <h2 className="text-4xl font-semibold leading-tight tracking-tight">De la demande client au solde, chaque Ã©tape est tracÃ©e.</h2>
           <ol className="mt-10 space-y-0">
             {flow.map((step, i) => (
               <li key={step} className="relative flex items-center gap-4 pb-5 last:pb-0">
@@ -19,7 +19,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             ))}
           </ol>
         </div>
-        <p className="text-sm text-white/60">Chaque entreprise travaille dans son espace isolé : équipes, clients et chiffres restent privés.</p>
+        <p className="text-sm text-white/60">Chaque entreprise travaille dans son espace isolÃ© : Ã©quipes, clients et chiffres restent privÃ©s.</p>
       </aside>
       <main className="flex items-center justify-center px-5 py-10 sm:px-10">
         <div className="w-full max-w-md">
