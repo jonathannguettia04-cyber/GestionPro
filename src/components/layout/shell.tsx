@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Building2, ChevronsLeft, ChevronsRight, FileText, LayoutDashboard, LogOut, Menu, Receipt, ShieldCheck, Users, Wallet, X } from "lucide-react";
+import { Banknote, Building2, ChevronsLeft, ChevronsRight, FileText, LayoutDashboard, LogOut, Menu, Package, Receipt, ShieldCheck, UserRound, Users, Wallet, X } from "lucide-react";
 import clsx from "clsx";
 import { signOutAction } from "@/lib/auth/actions";
 import { switchOrganizationAction } from "@/lib/auth/org-actions";
@@ -14,9 +14,12 @@ const NAV = [
   { label: "Départements", icon: Building2, href: "/departments", perm: "departments.view" },
   { label: "Collaborateurs", icon: Users, href: "/employees", perm: "employees.view" },
   { label: "Permissions", icon: ShieldCheck, href: "/settings/permissions", perm: "permissions.manage" },
-  { label: "Devis", icon: FileText, phase: 3 },
-  { label: "Factures", icon: Receipt, phase: 3 },
-  { label: "Dépenses", icon: Wallet, phase: 3 },
+  { label: "Clients", icon: UserRound, href: "/clients", perm: "clients.view" },
+  { label: "Produits et services", icon: Package, href: "/products", perm: "catalog.view" },
+  { label: "Devis", icon: FileText, href: "/quotes", perm: "quotes.view" },
+  { label: "Factures", icon: Receipt, href: "/invoices", perm: "invoices.view" },
+  { label: "Paiements", icon: Banknote, href: "/payments", perm: "payments.view" },
+  { label: "Dépenses", icon: Wallet, href: "/expenses", perm: "expenses.view" },
 ];
 
 type Props = {
@@ -31,14 +34,9 @@ export function Shell({ orgName, orgId, organizations, userName, roleLabel, perm
 
   const nav = (
     <nav className="flex-1 space-y-1 px-3 py-4" aria-label="Navigation principale">
-      {NAV.filter((n) => !n.perm || permissions.includes(n.perm)).map(({ label, icon: Icon, href, phase }) => {
+      {NAV.filter((n) => !n.perm || permissions.includes(n.perm)).map(({ label, icon: Icon, href }) => {
         const cls = "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm";
         const text = <span className={clsx(collapsed && "lg:hidden")}>{label}</span>;
-        if (!href) return (
-          <div key={label} title={`Disponible en phase ${phase}`} aria-disabled className={clsx(cls, "cursor-not-allowed text-white/45")}>
-            <Icon size={18} className="shrink-0" />{text}
-          </div>
-        );
         const active = pathname === href || pathname.startsWith(href + "/");
         return (
           <Link key={label} href={href} onClick={() => setOpen(false)} aria-current={active ? "page" : undefined}

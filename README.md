@@ -28,5 +28,14 @@ SaaS multi-entreprises de gestion (imprimerie, événementiel). Next.js 15 (App 
 - Invitations : `create_invitation()` (jeton généré en base, seul le hash est stocké) et `accept_invitation()` (e-mail vérifié et identique à l'invitation). **Pas d'envoi d'e-mail** : le lien est affiché une fois à l'administrateur.
 - Pages : /departments, /employees, /employees/[id], /settings/permissions, /invite/[token]. Sélecteur d'entreprise si l'utilisateur en a plusieurs.
 
+## Phase 3 : gestion commerciale
+- Migration `20261126000001_commercial.sql` : `clients`, `catalog_items`, `quotes`/`quote_items`, `invoices`/`invoice_items`, `payments`, `expenses`, `document_counters`.
+- **Aucun montant ne vient du navigateur** : devis, factures, lignes, paiements et statuts n'ont aucun droit d'écriture direct ; tout passe par des fonctions SQL transactionnelles (`save_quote`, `update_quote_status`, `convert_quote_to_invoice`, `save_invoice`, `issue_invoice`, `cancel_invoice`, `record_payment`, `set_expense_status`). Les totaux sont calculés par triggers (arrondi selon la devise : XOF/XAF sans décimale).
+- Numérotation atomique par entreprise et par année (`DEV-2026-0001`). Les factures ne sont numérotées qu'à l'émission : pas de trou dans la séquence.
+- Documents émis/acceptés verrouillés ; paiement limité au solde ; annulation impossible si paiements ; séparation des tâches sur la validation des dépenses (seul le propriétaire valide ses propres dépenses).
+- Visibilité : clients, devis, factures et dépenses rattachés à un département ne sont visibles qu'aux membres de ce département (ou accès transversal). Chiffres financiers : permission `finance.view`.
+- PDF devis/factures (`pdf-lib`, permission `*.export`). Justificatifs de dépenses : bucket privé `expense-receipts`, URLs signées de 5 minutes.
+- `npx tsx tests/pdf-smoke.ts /tmp/sample.pdf` génère un PDF d'exemple (accents, pagination).
+
 ## Hors périmètre actuel
-Données métier (clients, devis, factures...) : Phase 3 ; elles devront porter `department_id` et utiliser `can_access_department()`.
+Tâches, workflows imprimerie/événementiel, notifications, rapports avancés : Phase 4. Abonnements et super-administration : Phase 5.
