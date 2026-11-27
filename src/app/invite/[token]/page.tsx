@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { AcceptForm } from "@/components/invite/accept-form";
+import { AcceptForm } from "./accept-form";
 import { Logo } from "@/components/layout/logo";
 import { createClient } from "@/lib/supabase/server";
 

@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start -p ${PORT:-3000}",
     "typecheck": "tsc --noEmit",
-    "test:db": "bash tests/run-db-tests.sh"
+    "test:db": "bash tests/run-db-tests.sh",
+    "fix:encoding": "node scripts/fix-mojibake.mjs",
+    "check:encoding": "node scripts/fix-mojibake.mjs --check"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.1.0",
